@@ -47,6 +47,9 @@ _FORCE_INLINE_ static bool _can_collide_with(CollisionObjectSW *p_object, uint32
 		return false;
 	}
 
+	if (p_object->get_type() == CollisionObjectSW::TYPE_SOFT_BODY && !p_collide_with_bodies)
+		return false;
+
 	return true;
 }
 
@@ -409,7 +412,7 @@ struct _RestCallbackData {
 	real_t min_allowed_depth;
 };
 
-static void _rest_cbk_result(const Vector3 &p_point_A, const Vector3 &p_point_B, void *p_userdata) {
+static void _rest_cbk_result(const Vector3 &p_point_A, int p_index_A, const Vector3 &p_point_B, int p_index_B, void *p_userdata) {
 	_RestCallbackData *rd = (_RestCallbackData *)p_userdata;
 
 	Vector3 contact_rel = p_point_B - p_point_A;
@@ -538,7 +541,9 @@ int SpaceSW::_cull_aabb_for_body(BodySW *p_body, const AABB &p_aabb) {
 
 		if (intersection_query_results[i] == p_body) {
 			keep = false;
-		} else if (intersection_query_results[i]->get_type() == CollisionObjectSW::TYPE_AREA) {
+		} else if (intersection_query_results[i]->get_type() == CollisionObjectSW::TYPE_SOFT_BODY) {
+			keep = false;
+		} else if ((static_cast<BodySW *>(intersection_query_results[i])->test_collision_mask(p_body)) == 0) {
 			keep = false;
 		} else if ((static_cast<BodySW *>(intersection_query_results[i])->test_collision_mask(p_body)) == 0) {
 			keep = false;
@@ -1095,14 +1100,23 @@ void *SpaceSW::_broadphase_pair(CollisionObjectSW *A, int p_subindex_A, Collisio
 			AreaSW *area_b = static_cast<AreaSW *>(B);
 			Area2PairSW *area2_pair = memnew(Area2PairSW(area_b, p_subindex_B, area, p_subindex_A));
 			return area2_pair;
+		} else if (type_B == CollisionObjectSW::TYPE_SOFT_BODY) {
+			// Area/Soft Body, not supported.
 		} else {
 			BodySW *body = static_cast<BodySW *>(B);
 			AreaPairSW *area_pair = memnew(AreaPairSW(body, p_subindex_B, area, p_subindex_A));
 			return area_pair;
 		}
+	} else if (type_A == CollisionObjectSW::TYPE_BODY) {
+		if (type_B == CollisionObjectSW::TYPE_SOFT_BODY) {
+			BodySoftBodyPairSW *soft_pair = memnew(BodySoftBodyPairSW((BodySW *)A, p_subindex_A, (SoftBodySW *)B));
+			return soft_pair;
+		} else {
+			BodyPairSW *b = memnew(BodyPairSW((BodySW *)A, p_subindex_A, (BodySW *)B, p_subindex_B));
+			return b;
+		}
 	} else {
-		BodyPairSW *b = memnew(BodyPairSW((BodySW *)A, p_subindex_A, (BodySW *)B, p_subindex_B));
-		return b;
+		// Soft Body/Soft Body, not supported.
 	}
 
 	return nullptr;
@@ -1179,6 +1193,18 @@ void SpaceSW::area_remove_from_moved_list(SelfList<AreaSW> *p_area) {
 
 const SelfList<AreaSW>::List &SpaceSW::get_moved_area_list() const {
 	return area_moved_list;
+}
+
+const SelfList<SoftBodySW>::List &SpaceSW::get_active_soft_body_list() const {
+	return active_soft_body_list;
+}
+
+void SpaceSW::soft_body_add_to_active_list(SelfList<SoftBodySW> *p_soft_body) {
+	active_soft_body_list.add(p_soft_body);
+}
+
+void SpaceSW::soft_body_remove_from_active_list(SelfList<SoftBodySW> *p_soft_body) {
+	active_soft_body_list.remove(p_soft_body);
 }
 
 void SpaceSW::call_queries() {

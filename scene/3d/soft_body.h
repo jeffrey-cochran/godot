@@ -32,10 +32,11 @@
 #define SOFT_PHYSICS_BODY_H
 
 #include "scene/3d/mesh_instance.h"
+#include "servers/physics_server.h"
 
 class SoftBody;
 
-class SoftBodyVisualServerHandler {
+class SoftBodyVisualServerHandler : public VisualServerHandler {
 	friend class SoftBody;
 
 	RID mesh;
@@ -124,6 +125,8 @@ public:
 	void prepare_physics_server();
 	void become_mesh_owner();
 
+	RID get_physics_rid() const { return physics_rid; }
+
 	void set_collision_mask(uint32_t p_mask);
 	uint32_t get_collision_mask() const;
 
@@ -154,17 +157,8 @@ public:
 	void set_linear_stiffness(real_t p_linear_stiffness);
 	real_t get_linear_stiffness();
 
-	void set_areaAngular_stiffness(real_t p_areaAngular_stiffness);
-	real_t get_areaAngular_stiffness();
-
-	void set_volume_stiffness(real_t p_volume_stiffness);
-	real_t get_volume_stiffness();
-
 	void set_pressure_coefficient(real_t p_pressure_coefficient);
 	real_t get_pressure_coefficient();
-
-	void set_pose_matching_coefficient(real_t p_pose_matching_coefficient);
-	real_t get_pose_matching_coefficient();
 
 	void set_damping_coefficient(real_t p_damping_coefficient);
 	real_t get_damping_coefficient();

@@ -36,7 +36,6 @@
 #include "scene/3d/collision_object.h"
 #include "scene/3d/physics_body.h"
 #include "scene/3d/skeleton.h"
-#include "servers/physics_server.h"
 
 SoftBodyVisualServerHandler::SoftBodyVisualServerHandler() {}
 
@@ -313,6 +312,8 @@ void SoftBody::_notification(int p_what) {
 void SoftBody::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_draw_soft_mesh"), &SoftBody::_draw_soft_mesh);
 
+	ClassDB::bind_method(D_METHOD("get_physics_rid"), &SoftBody::get_physics_rid);
+	
 	ClassDB::bind_method(D_METHOD("set_physics_enabled", "enabled"), &SoftBody::set_physics_enabled);
 	ClassDB::bind_method(D_METHOD("is_physics_enabled"), &SoftBody::is_physics_enabled);
 
@@ -344,17 +345,8 @@ void SoftBody::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_linear_stiffness", "linear_stiffness"), &SoftBody::set_linear_stiffness);
 	ClassDB::bind_method(D_METHOD("get_linear_stiffness"), &SoftBody::get_linear_stiffness);
 
-	ClassDB::bind_method(D_METHOD("set_areaAngular_stiffness", "areaAngular_stiffness"), &SoftBody::set_areaAngular_stiffness);
-	ClassDB::bind_method(D_METHOD("get_areaAngular_stiffness"), &SoftBody::get_areaAngular_stiffness);
-
-	ClassDB::bind_method(D_METHOD("set_volume_stiffness", "volume_stiffness"), &SoftBody::set_volume_stiffness);
-	ClassDB::bind_method(D_METHOD("get_volume_stiffness"), &SoftBody::get_volume_stiffness);
-
 	ClassDB::bind_method(D_METHOD("set_pressure_coefficient", "pressure_coefficient"), &SoftBody::set_pressure_coefficient);
 	ClassDB::bind_method(D_METHOD("get_pressure_coefficient"), &SoftBody::get_pressure_coefficient);
-
-	ClassDB::bind_method(D_METHOD("set_pose_matching_coefficient", "pose_matching_coefficient"), &SoftBody::set_pose_matching_coefficient);
-	ClassDB::bind_method(D_METHOD("get_pose_matching_coefficient"), &SoftBody::get_pose_matching_coefficient);
 
 	ClassDB::bind_method(D_METHOD("set_damping_coefficient", "damping_coefficient"), &SoftBody::set_damping_coefficient);
 	ClassDB::bind_method(D_METHOD("get_damping_coefficient"), &SoftBody::get_damping_coefficient);
@@ -375,12 +367,9 @@ void SoftBody::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "simulation_precision", PROPERTY_HINT_RANGE, "1,100,1"), "set_simulation_precision", "get_simulation_precision");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "total_mass", PROPERTY_HINT_RANGE, "0.01,10000,1"), "set_total_mass", "get_total_mass");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "linear_stiffness", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_linear_stiffness", "get_linear_stiffness");
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "areaAngular_stiffness", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_areaAngular_stiffness", "get_areaAngular_stiffness");
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "volume_stiffness", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_volume_stiffness", "get_volume_stiffness");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "pressure_coefficient"), "set_pressure_coefficient", "get_pressure_coefficient");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "damping_coefficient", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_damping_coefficient", "get_damping_coefficient");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "drag_coefficient", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_drag_coefficient", "get_drag_coefficient");
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "pose_matching_coefficient", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_pose_matching_coefficient", "get_pose_matching_coefficient");
 
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "ray_pickable"), "set_ray_pickable", "is_ray_pickable");
 }
@@ -641,32 +630,8 @@ real_t SoftBody::get_linear_stiffness() {
 	return PhysicsServer::get_singleton()->soft_body_get_linear_stiffness(physics_rid);
 }
 
-void SoftBody::set_areaAngular_stiffness(real_t p_areaAngular_stiffness) {
-	PhysicsServer::get_singleton()->soft_body_set_areaAngular_stiffness(physics_rid, p_areaAngular_stiffness);
-}
-
-real_t SoftBody::get_areaAngular_stiffness() {
-	return PhysicsServer::get_singleton()->soft_body_get_areaAngular_stiffness(physics_rid);
-}
-
-void SoftBody::set_volume_stiffness(real_t p_volume_stiffness) {
-	PhysicsServer::get_singleton()->soft_body_set_volume_stiffness(physics_rid, p_volume_stiffness);
-}
-
-real_t SoftBody::get_volume_stiffness() {
-	return PhysicsServer::get_singleton()->soft_body_get_volume_stiffness(physics_rid);
-}
-
 real_t SoftBody::get_pressure_coefficient() {
 	return PhysicsServer::get_singleton()->soft_body_get_pressure_coefficient(physics_rid);
-}
-
-void SoftBody::set_pose_matching_coefficient(real_t p_pose_matching_coefficient) {
-	PhysicsServer::get_singleton()->soft_body_set_pose_matching_coefficient(physics_rid, p_pose_matching_coefficient);
-}
-
-real_t SoftBody::get_pose_matching_coefficient() {
-	return PhysicsServer::get_singleton()->soft_body_get_pose_matching_coefficient(physics_rid);
 }
 
 void SoftBody::set_pressure_coefficient(real_t p_pressure_coefficient) {

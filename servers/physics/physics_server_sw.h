@@ -60,6 +60,7 @@ class PhysicsServerSW : public PhysicsServer {
 	mutable RID_Owner<SpaceSW> space_owner;
 	mutable RID_Owner<AreaSW> area_owner;
 	mutable RID_Owner<BodySW> body_owner;
+	mutable RID_Owner<SoftBodySW> soft_body_owner;
 	mutable RID_Owner<JointSW> joint_owner;
 
 	//void _clear_query(QuerySW *p_query);
@@ -76,7 +77,7 @@ public:
 		Vector3 *ptr;
 	};
 
-	static void _shape_col_cbk(const Vector3 &p_point_A, const Vector3 &p_point_B, void *p_userdata);
+	static void _shape_col_cbk(const Vector3 &p_point_A, int p_index_A, const Vector3 &p_point_B, int p_index_B, void *p_userdata);
 
 	virtual RID shape_create(ShapeType p_shape);
 	virtual void shape_set_data(RID p_shape, const Variant &p_data);
@@ -241,69 +242,59 @@ public:
 
 	/* SOFT BODY */
 
-	virtual RID soft_body_create(bool p_init_sleeping = false) { return RID(); }
+	virtual RID soft_body_create(bool p_init_sleeping = false);
 
-	virtual void soft_body_update_visual_server(RID p_body, class SoftBodyVisualServerHandler *p_visual_server_handler) {}
+	virtual void soft_body_update_visual_server(RID p_body, VisualServerHandler *p_visual_server_handler);
 
-	virtual void soft_body_set_space(RID p_body, RID p_space) {}
-	virtual RID soft_body_get_space(RID p_body) const { return RID(); }
+	virtual void soft_body_set_space(RID p_body, RID p_space);
+	virtual RID soft_body_get_space(RID p_body) const;
 
-	virtual void soft_body_set_collision_layer(RID p_body, uint32_t p_layer) {}
-	virtual uint32_t soft_body_get_collision_layer(RID p_body) const { return 0; }
+	virtual void soft_body_set_collision_layer(RID p_body, uint32_t p_layer);
+	virtual uint32_t soft_body_get_collision_layer(RID p_body) const;
 
-	virtual void soft_body_set_collision_mask(RID p_body, uint32_t p_mask) {}
-	virtual uint32_t soft_body_get_collision_mask(RID p_body) const { return 0; }
+	virtual void soft_body_set_collision_mask(RID p_body, uint32_t p_mask);
+	virtual uint32_t soft_body_get_collision_mask(RID p_body) const;
 
-	virtual void soft_body_add_collision_exception(RID p_body, RID p_body_b) {}
-	virtual void soft_body_remove_collision_exception(RID p_body, RID p_body_b) {}
-	virtual void soft_body_get_collision_exceptions(RID p_body, List<RID> *p_exceptions) {}
+	virtual void soft_body_add_collision_exception(RID p_body, RID p_body_b);
+	virtual void soft_body_remove_collision_exception(RID p_body, RID p_body_b);
+	virtual void soft_body_get_collision_exceptions(RID p_body, List<RID> *p_exceptions);
 
-	virtual void soft_body_set_state(RID p_body, BodyState p_state, const Variant &p_variant) {}
-	virtual Variant soft_body_get_state(RID p_body, BodyState p_state) const { return Variant(); }
+	virtual void soft_body_set_state(RID p_body, BodyState p_state, const Variant &p_variant);
+	virtual Variant soft_body_get_state(RID p_body, BodyState p_state) const;
 
-	virtual void soft_body_set_transform(RID p_body, const Transform &p_transform) {}
-	virtual Vector3 soft_body_get_vertex_position(RID p_body, int vertex_index) const { return Vector3(); }
+	virtual void soft_body_set_transform(RID p_body, const Transform &p_transform);
 
-	virtual void soft_body_set_ray_pickable(RID p_body, bool p_enable) {}
-	virtual bool soft_body_is_ray_pickable(RID p_body) const { return false; }
+	virtual void soft_body_set_ray_pickable(RID p_body, bool p_enable);
+	virtual bool soft_body_is_ray_pickable(RID p_body) const;
 
-	virtual void soft_body_set_simulation_precision(RID p_body, int p_simulation_precision) {}
-	virtual int soft_body_get_simulation_precision(RID p_body) { return 0; }
+	virtual void soft_body_set_simulation_precision(RID p_body, int p_simulation_precision);
+	virtual int soft_body_get_simulation_precision(RID p_body) const;
 
-	virtual void soft_body_set_total_mass(RID p_body, real_t p_total_mass) {}
-	virtual real_t soft_body_get_total_mass(RID p_body) { return 0.; }
+	virtual void soft_body_set_total_mass(RID p_body, real_t p_total_mass);
+	virtual real_t soft_body_get_total_mass(RID p_body) const;
 
-	virtual void soft_body_set_linear_stiffness(RID p_body, real_t p_stiffness) {}
-	virtual real_t soft_body_get_linear_stiffness(RID p_body) { return 0.; }
+	virtual void soft_body_set_linear_stiffness(RID p_body, real_t p_stiffness);
+	virtual real_t soft_body_get_linear_stiffness(RID p_body) const;
 
-	virtual void soft_body_set_areaAngular_stiffness(RID p_body, real_t p_stiffness) {}
-	virtual real_t soft_body_get_areaAngular_stiffness(RID p_body) { return 0.; }
+	virtual void soft_body_set_pressure_coefficient(RID p_body, real_t p_pressure_coefficient);
+	virtual real_t soft_body_get_pressure_coefficient(RID p_body) const;
 
-	virtual void soft_body_set_volume_stiffness(RID p_body, real_t p_stiffness) {}
-	virtual real_t soft_body_get_volume_stiffness(RID p_body) { return 0.; }
+	virtual void soft_body_set_damping_coefficient(RID p_body, real_t p_damping_coefficient);
+	virtual real_t soft_body_get_damping_coefficient(RID p_body) const;
 
-	virtual void soft_body_set_pressure_coefficient(RID p_body, real_t p_pressure_coefficient) {}
-	virtual real_t soft_body_get_pressure_coefficient(RID p_body) { return 0.; }
+	virtual void soft_body_set_drag_coefficient(RID p_body, real_t p_drag_coefficient);
+	virtual real_t soft_body_get_drag_coefficient(RID p_body) const;
 
-	virtual void soft_body_set_pose_matching_coefficient(RID p_body, real_t p_pose_matching_coefficient) {}
-	virtual real_t soft_body_get_pose_matching_coefficient(RID p_body) { return 0.; }
+	virtual void soft_body_set_mesh(RID p_body, const REF &p_mesh);
 
-	virtual void soft_body_set_damping_coefficient(RID p_body, real_t p_damping_coefficient) {}
-	virtual real_t soft_body_get_damping_coefficient(RID p_body) { return 0.; }
+	virtual AABB soft_body_get_bounds(RID p_body) const;
 
-	virtual void soft_body_set_drag_coefficient(RID p_body, real_t p_drag_coefficient) {}
-	virtual real_t soft_body_get_drag_coefficient(RID p_body) { return 0.; }
+	virtual void soft_body_move_point(RID p_body, int p_point_index, const Vector3 &p_global_position);
+	virtual Vector3 soft_body_get_point_global_position(RID p_body, int p_point_index) const;
 
-	virtual void soft_body_set_mesh(RID p_body, const REF &p_mesh) {}
-
-	virtual void soft_body_move_point(RID p_body, int p_point_index, const Vector3 &p_global_position) {}
-	virtual Vector3 soft_body_get_point_global_position(RID p_body, int p_point_index) { return Vector3(); }
-
-	virtual Vector3 soft_body_get_point_offset(RID p_body, int p_point_index) const { return Vector3(); }
-
-	virtual void soft_body_remove_all_pinned_points(RID p_body) {}
-	virtual void soft_body_pin_point(RID p_body, int p_point_index, bool p_pin) {}
-	virtual bool soft_body_is_point_pinned(RID p_body, int p_point_index) { return false; }
+	virtual void soft_body_remove_all_pinned_points(RID p_body);
+	virtual void soft_body_pin_point(RID p_body, int p_point_index, bool p_pin);
+	virtual bool soft_body_is_point_pinned(RID p_body, int p_point_index) const;
 
 	/* JOINT API */
 

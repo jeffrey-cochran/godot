@@ -135,7 +135,7 @@ public:
 	// request new addition to stack
 	T *request() {
 		if (depth > threshold) {
-			if (aux_stack.empty()) {
+			if (aux_stack.is_empty()) {
 				aux_stack.resize(ALLOCA_STACK_SIZE * 2);
 				memcpy(aux_stack.ptr(), stack, get_alloca_stacksize());
 			} else {

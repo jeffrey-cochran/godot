@@ -48,7 +48,8 @@ class CollisionObjectSW : public ShapeOwnerSW {
 public:
 	enum Type {
 		TYPE_AREA,
-		TYPE_BODY
+		TYPE_BODY,
+		TYPE_SOFT_BODY,
 	};
 
 private:
@@ -140,8 +141,8 @@ public:
 		return shapes[p_index].area_cache;
 	}
 
-	_FORCE_INLINE_ Transform get_transform() const { return transform; }
-	_FORCE_INLINE_ Transform get_inv_transform() const { return inv_transform; }
+	_FORCE_INLINE_ const Transform &get_transform() const { return transform; }
+	_FORCE_INLINE_ const Transform &get_inv_transform() const { return inv_transform; }
 	_FORCE_INLINE_ SpaceSW *get_space() const { return space; }
 
 	_FORCE_INLINE_ void set_ray_pickable(bool p_enable) { ray_pickable = p_enable; }
